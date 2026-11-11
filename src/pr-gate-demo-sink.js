@@ -6,13 +6,15 @@ const express = require('express');
 const path = require('path');
 
 const router = express.Router();
-const BASE_DIR = path.join(__dirname, '..');
 
 router.get('/read', (req, res) => {
-  const filename = req.query.file;
-  const filepath = BASE_DIR + '/' + filename;
-  fs.readFile(filepath, 'utf8', (err, data) => {
-    if (err) return res.status(500).send(err.message);
+  // Only this public document may be read; request data never forms a path.
+  if (req.query.file !== 'README.md') {
+    return res.status(400).send('Unsupported file');
+  }
+
+  fs.readFile(path.join(__dirname, '..', 'README.md'), 'utf8', (err, data) => {
+    if (err) return res.status(500).send('Unable to read file');
     res.send(data);
   });
 });
